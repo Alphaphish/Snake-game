@@ -1,0 +1,123 @@
+import pygame
+import random
+pygame.init()
+
+#rang bhi jaruri
+white=(255,255,255)
+color1=(114,104,104)
+color2=(240,20,20)
+black=(0,0,0)
+
+width=1000
+height=600
+window = pygame.display.set_mode((width,height))
+clock=pygame.time.Clock()
+font=pygame.font.SysFont("century gothic",40)
+pygame.display.set_caption("Bhooka SAAMP ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+
+
+def text_screen(text,color,text_x,text_y):
+    screen_text=font.render(text,True,color)
+    window.blit(screen_text,[text_x,text_y])
+
+def plot_snake(window,color,snk_list,size):
+    for x,y in snk_list:
+        pygame.draw.rect(window,color,[x,y,size,size])
+        #player_image = pygame.image.load("snake.png")
+        #window.blit(player_image,(a))
+    
+def gameloop():
+    sp=8
+    Exit=False
+    game_over=False
+    x=width//2
+    y=height//2
+    size=20
+    fps=30
+    vel_x=0
+    vel_y=0
+    score=0
+   
+    food_x= random.randint(30, width)
+    food_y= random.randint(30, height)
+    snk_list=[]
+    snk_length=1
+
+    with open("highonsaamp.txt","r") as f:
+        hiscore = f.read()
+    
+    while not Exit:
+        if game_over:
+            with open("highonsaamp.txt","w") as f:
+                f.write(str(hiscore))
+            window.fill((255,255,255))
+            text_screen("Game over! Press enter to continue",color2,150,250)
+            text_screen("Highscore:"+ str(hiscore),black,350,330)
+            text_screen("Your Score:"+ str(score),black,360,290)
+            for event in pygame.event.get():
+                if event.type==pygame.QUIT:
+                    Exit=True
+                if event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_RETURN:
+                        gameloop()
+        else:
+            for event in pygame.event.get():
+                if event.type==pygame.QUIT:
+                    Exit=True
+                
+                if event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_RIGHT:
+                        vel_x=sp
+                        vel_y=0
+                if event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_LEFT:
+                        vel_x=-sp
+                        vel_y=0
+                if event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_UP:
+                        vel_y=-sp
+                        vel_x=0
+                if event.type==pygame.KEYDOWN:
+                    if event.key==pygame.K_DOWN:
+                        vel_y=sp
+                        vel_x=0
+            x=x+vel_x
+            y=y+vel_y
+
+            if abs(x-food_x)<10 and abs(y-food_y)<10:
+                score+=10
+                food_x= random.randint(20, width//1.1)
+                food_y= random.randint(30, height//1.1)
+                snk_length+=5
+                if score>int(hiscore):
+                    hiscore=score 
+        
+            window.fill(white)
+            text_screen("Score:"+ str(score),black,5,5)
+            text_screen("Highscore:"+ str(hiscore),black,5,35)
+            pygame.draw.rect(window,color2,[food_x,food_y,size,size])
+            #food_image = pygame.image.load("food_01.png")
+            #window.blit(food_image,(b))
+    
+
+            head=[]
+            head.append(x)
+            head.append(y)
+
+            snk_list.append(head)
+            if len(snk_list)>snk_length:
+                del snk_list[0]
+
+            if head in snk_list[:-1]:
+                game_over=True
+                
+
+            if x<0 or y<0 or x>width or y>height:
+                game_over=True
+            
+            plot_snake(window,color1,snk_list,size)
+        pygame.display.update()
+        clock.tick(fps)
+
+    pygame.quit()
+gameloop()
